@@ -1,5 +1,5 @@
 #include "widget.h"
-#include "./ui_widget.h"
+#include "src/ui_widget.h"
 #include <QMouseEvent>
 #include <QPainter>
 #include <QVector2D>
@@ -17,7 +17,6 @@ Widget::Widget(QWidget *parent)
     this->setMouseTracking(true);
 
     setCursor(Qt::CrossCursor);
-    setGeometry(0,0,300,300);
 
     root = new Node(QRect(0, 0, this->width(), this->height()),4,nullptr);
 
@@ -38,6 +37,7 @@ Widget::Widget(QWidget *parent)
 
 void Widget::gameLoop(){
     processInput();
+    root->update(circles);
     qint64 currentTime = timer.elapsed();
     double deltaTime = (currentTime - lastUpdateTime) / 1000.0;  // Convert to seconds
     lastUpdateTime = currentTime;
@@ -52,7 +52,7 @@ void Widget::gameLoop(){
 }
 
 void Widget::processInput(){
-    if (leftMouseReleased) {
+    if (leftMousePressed) {
     Circle* newCircle = new Circle(lastMousePos);
     circles.push_back(newCircle);
     root->insert(newCircle);
@@ -75,14 +75,27 @@ void Widget::tick(qint64 delta){
 
             // Normalize and apply force
             pushDirection.normalize();
+            pushDirection*=10;
             //pushDirection /= distance;
             circle->pos += (pushDirection).toPoint();
 
             circle->velocity += pushDirection * PUSH_FORCE * delta;
         }
     }
+    for(Circle* circle : circles){
+        QPoint  pos = circle->pos;
+        int rad = circle->rad;
+        QRect rect = QRect(pos.x() - rad, pos.y() - rad, 4 * rad, 4 * rad);
+        QVector<Circle*> tests = root->contains(rect);
 
-    checkCollisionsInOctree(root);
+        for (int i = 0; i < tests.size(); ++i) {
+                if (circlesCollide(circle, tests[i])) {
+                    resolveCollision(circle, tests[i]);
+            }
+        }
+
+    }
+    //checkCollisionsInOctree(root);
 /*
     Handle circle-circle collisions
     for (int i = 0; i < circles.size(); ++i) {
@@ -92,7 +105,7 @@ void Widget::tick(qint64 delta){
             }
         }
     }
-*/
+
 
     //Update positions
     for (Circle* circle : circles) {
@@ -100,7 +113,7 @@ void Widget::tick(qint64 delta){
 
         // Apply damping to velocity
         circle->velocity *= DAMPING;
-    }
+    }*/
 
 
 }

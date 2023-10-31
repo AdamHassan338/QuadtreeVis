@@ -60,11 +60,47 @@ Node *Node::find(Circle* circle)
     return nullptr;
 }
 
+QVector<Circle*> Node::contains(QRect area)
+{
+    QVector<Circle*> foundCircles;
+
+    if (!m_bounds.intersects(area)) {
+        return foundCircles;
+    }
+
+    // Check each circle in this node to see if it lies within the range
+    for (Circle* circle : m_circles) {
+        if (area.contains(circle->pos)) {  // Assuming the circle object has a 'center' attribute
+            foundCircles.push_back(circle);
+        }
+    }
+
+    // If this node has children, recurse into them and collect their results
+    if (!m_children.isEmpty()) {
+        for (Node* child : m_children) {
+            QVector<Circle*> childCircles = child->contains(area);
+            foundCircles += childCircles;
+        }
+    }
+
+    /*
+    if (!m_bounds.intersects(area)) {
+        return circles;
+    }
+    if(m_children.isEmpty()){
+        circles.append(m_circles);
+        return circles;
+    }
+    for(Node* child: m_children){
+        circles.append(child->contains(area));
+    }
+*/
+    return foundCircles;
+}
+
 Node *Node::findPos(QPoint pos)
 {
-    if (!m_bounds.contains(pos)) {
-        return nullptr;
-    }
+
 
     if (m_children.isEmpty()) {
         return this;
@@ -100,6 +136,18 @@ Node *Node::getNeighbour(quadrant quad)
     }
 
     return nullptr;
+}
+
+void Node::update(QVector<Circle*> circles)
+{
+    for(int i = 0; i< m_children.size(); i++){
+        delete m_children.at(i);
+    }
+    m_children = QVector<Node*>();
+    m_circles = QVector<Circle*>();
+    for(Circle* c : circles){
+        this->insert(c);
+    }
 }
 
 Node *Node::getBigNeighbour(direction direction)

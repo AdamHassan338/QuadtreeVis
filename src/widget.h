@@ -26,7 +26,7 @@ private:
     QTimer gameLoopTimer;
     QElapsedTimer timer;
     qint64 lastUpdateTime;
-    int m_tickRate = 1;
+    int m_tickRate = 10;
 
     bool leftMousePressed = false;
     bool rightMousePressed = false;

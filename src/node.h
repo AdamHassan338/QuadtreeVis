@@ -7,7 +7,7 @@
 class Node
 {
 public:
-    static const int MAX_DEPTH = 4;
+    static const int MAX_DEPTH = 6;
     Node* m_parent;
     int m_currentDepth;
     QRect m_bounds;
@@ -21,9 +21,11 @@ public:
     Node(QRect bounds, int capacity, Node* parent);
     bool insert(Circle* circle);
     Node* find(Circle* circle);
+    QVector<Circle*> contains(QRect area);
     Node* findPos(QPoint p);
     Node* search(QRect rect);
     Node* getNeighbour(quadrant quad);
+    void update(QVector<Circle*> circles);
 
     Node* getBigNeighbour(direction direction);
 
