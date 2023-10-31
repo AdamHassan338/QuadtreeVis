@@ -52,8 +52,13 @@ void Widget::gameLoop(){
 }
 
 void Widget::processInput(){
+    QPoint p;
+
     if (leftMousePressed) {
-    Circle* newCircle = new Circle(lastMousePos);
+    p.setX(rand() % 11 - 5);
+    p.setY(rand() % 11 - 5);
+
+    Circle* newCircle = new Circle(p+lastMousePos);
     circles.push_back(newCircle);
     root->insert(newCircle);
     leftMouseReleased = false;
@@ -75,13 +80,13 @@ void Widget::tick(qint64 delta){
 
             // Normalize and apply force
             pushDirection.normalize();
-            pushDirection*=10;
+            pushDirection*=1;
             //pushDirection /= distance;
             circle->pos += (pushDirection).toPoint();
 
             circle->velocity += pushDirection * PUSH_FORCE * delta;
         }
-    }
+    }/*
     for(Circle* circle : circles){
         QPoint  pos = circle->pos;
         int rad = circle->rad;
@@ -94,8 +99,8 @@ void Widget::tick(qint64 delta){
             }
         }
 
-    }
-    //checkCollisionsInOctree(root);
+    }*/
+    checkCollisionsInOctree(root);
 /*
     Handle circle-circle collisions
     for (int i = 0; i < circles.size(); ++i) {
@@ -124,6 +129,7 @@ void Widget::checkCollisionsInOctree(Node *node)
     for (int i = 0; i < node->m_circles.size(); ++i) {
         for (int j = i + 1; j < node->m_circles.size(); ++j) {
             if (circlesCollide(node->m_circles[i], node->m_circles[j])) {
+                qDebug() << "overlapping";
                 resolveCollision(node->m_circles[i], node->m_circles[j]);
             }
         }
